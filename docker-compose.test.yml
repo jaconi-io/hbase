@@ -1,0 +1,49 @@
+services:
+  sut:
+    build: .
+    command: /test.sh
+    depends_on:
+      - namenode
+      - datanode1
+      - datanode2
+    volumes:
+      - ${PWD}/test/test.sh:/test.sh
+
+  namenode:
+    image: ghcr.io/jaconi-io/hadoop:3.3.0-latest
+    command: hdfs namenode
+    environment:
+      FS_DEFAULTFS: hdfs://namenode:9000
+    depends_on:
+      - namenode-format
+    volumes:
+      - namenode:/tmp/hadoop-root/dfs/name
+
+  namenode-format:
+    image: ghcr.io/jaconi-io/hadoop:3.3.0-latest
+    command: hdfs namenode -format -nonInteractive
+    environment:
+      FS_DEFAULTFS: hdfs://namenode:9000
+    volumes:
+      - namenode:/tmp/hadoop-root/dfs/name
+
+  datanode1:
+    image: ghcr.io/jaconi-io/hadoop:3.3.0-latest
+    command: hdfs datanode
+    environment:
+      FS_DEFAULTFS: hdfs://namenode:9000
+    volumes:
+      - datanode1:/tmp/hadoop-root/dfs/name
+
+  datanode2:
+    image: ghcr.io/jaconi-io/hadoop:3.3.0-latest
+    command: hdfs datanode
+    environment:
+      FS_DEFAULTFS: hdfs://namenode:9000
+    volumes:
+      - datanode2:/tmp/hadoop-root/dfs/name
+
+volumes:
+  namenode:
+  datanode1:
+  datanode2:
