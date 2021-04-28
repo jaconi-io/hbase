@@ -10,7 +10,7 @@ services:
       - ${PWD}/test/test.sh:/test.sh
 
   namenode:
-    image: ghcr.io/jaconi-io/hadoop:3.3.0-latest
+    image: jaconi/hadoop:latest-hadoop3.3.0
     command: hdfs namenode
     environment:
       FS_DEFAULTFS: hdfs://namenode:9000
@@ -20,7 +20,7 @@ services:
       - namenode:/tmp/hadoop-root/dfs/name
 
   namenode-format:
-    image: ghcr.io/jaconi-io/hadoop:3.3.0-latest
+    image: jaconi/hadoop:latest-hadoop3.3.0
     command: hdfs namenode -format -nonInteractive
     environment:
       FS_DEFAULTFS: hdfs://namenode:9000
@@ -28,7 +28,7 @@ services:
       - namenode:/tmp/hadoop-root/dfs/name
 
   datanode1:
-    image: ghcr.io/jaconi-io/hadoop:3.3.0-latest
+    image: jaconi/hadoop:latest-hadoop3.3.0
     command: hdfs datanode
     environment:
       FS_DEFAULTFS: hdfs://namenode:9000
@@ -36,7 +36,7 @@ services:
       - datanode1:/tmp/hadoop-root/dfs/name
 
   datanode2:
-    image: ghcr.io/jaconi-io/hadoop:3.3.0-latest
+    image: jaconi/hadoop:latest-hadoop3.3.0
     command: hdfs datanode
     environment:
       FS_DEFAULTFS: hdfs://namenode:9000
