@@ -16,33 +16,33 @@ on:
 jobs:
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
-  test:
-    runs-on: ubuntu-latest
+  # test:
+  #   runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        hbase: [1.6.0, 2.4.2] # Consider adding 1.4.13, 2.2.7 and 2.3.5.
+  #   strategy:
+  #     matrix:
+  #       hbase: [1.4.13, 1.6.0, 2.2.7, 2.3.5, 2.4.2]
 
-    steps:
-      - uses: actions/checkout@v2
+  #   steps:
+  #     - uses: actions/checkout@v2
 
-      - name: Run tests
-        run: |
-          docker-compose --file docker-compose.test.yml build --build-arg HBASE_VERSION=${{ matrix.hbase }}
-          docker-compose --file docker-compose.test.yml run sut
+  #     - name: Run tests
+  #       run: |
+  #         docker-compose --file docker-compose.test.yml build --build-arg HBASE_VERSION=${{ matrix.hbase }}
+  #         docker-compose --file docker-compose.test.yml run sut
 
   # Push image to Docker Hub and GitHub Container Registry.
   # See also https://docs.docker.com/docker-hub/builds/
   push:
     # Ensure test job passes before pushing image.
-    needs: test
+    # needs: test
 
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
 
     strategy:
       matrix:
-        hbase: [1.6.0, 2.4.2] # Consider adding 1.4.13, 2.2.7 and 2.3.5.
+        hbase: [1.4.13, 1.6.0, 2.2.7, 2.3.5, 2.4.2]
 
     steps:
       - uses: actions/checkout@v2
@@ -63,22 +63,17 @@ jobs:
       - name: Determine tags
         id: tags
         run: |
-          # Strip git ref prefix from version.
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # Get date in YYYYMMDDhhmmss format. April 29st 2021 09:30:00 will result in 20210429093000.
+          DATE=$(date '+%Y%m%d%H%M%S')
 
-          # Strip "v" prefix from tag name.
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [ "$GITHUB_REF" == "refs/heads/main" ] && echo "::set-output name=hub-latest::jaconi/hbase:${{ matrix.hbase }}-latest"
+          [ "$GITHUB_REF" == "refs/heads/main" ] && echo "::set-output name=ghcr-latest::ghcr.io/${{ github.repository }}:${{ matrix.hbase }}-latest"
 
-          # Use Docker `latest` tag convention.
-          [ "$VERSION" == "main" ] && VERSION=latest
-
-          echo "::set-output name=hub::jaconi/hbase:$VERSION-hbase${{ matrix.hbase }}"
-          echo "::set-output name=ghcr::ghcr.io/${{ github.repository }}:$VERSION-hbase${{ matrix.hbase }}"
+          echo "::set-output name=hub::jaconi/hbase:${{ matrix.hbase }}-$DATE"
+          echo "::set-output name=ghcr::ghcr.io/${{ github.repository }}:${{ matrix.hbase }}-$DATE"
 
       - uses: docker/build-push-action@v2
         with:
-          build-args: HBASE_VERSION=${{ matrix.hbase }}
+          build-args: HADOOP_VERSION=${{ matrix.hadoop }}
           push: true
-          tags: |
-            ${{ steps.tags.outputs.hub }}
-            ${{ steps.tags.outputs.ghcr }}
+          tags: ${{ join(steps.tags.outputs.*, ',') }}
