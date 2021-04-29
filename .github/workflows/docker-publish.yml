@@ -60,13 +60,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build image
-        uses: docker/build-push-action@v2
-        with:
-          build-args: HBASE_VERSION=${{ matrix.hbase }}
-          tags: ${{ github.repository }}
-
-      - name: Push image
+      - name: Determine tags
+        id: tags
         run: |
           # Strip git ref prefix from version.
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
@@ -77,8 +72,13 @@ jobs:
           # Use Docker `latest` tag convention.
           [ "$VERSION" == "main" ] && VERSION=latest
 
-          docker tag ${{ github.repository }} ghcr.io/${{ github.repository }}:$VERSION-hbase${{ matrix.hbase }}
-          docker push ghcr.io/${{ github.repository }}:$VERSION-hbase${{ matrix.hbase }}
+          echo "::set-output name=hub::jaconi/hbase:$VERSION-hbase${{ matrix.hbase }}"
+          echo "::set-output name=ghcr::ghcr.io/${{ github.repository }}:$VERSION-hbase${{ matrix.hbase }}"
 
-          docker tag ${{ github.repository }} jaconi/hbase:$VERSION-hbase${{ matrix.hbase }}
-          docker push jaconi/hbase:$VERSION-hbase${{ matrix.hbase }}
+      - uses: docker/build-push-action@v2
+        with:
+          build-args: HBASE_VERSION=${{ matrix.hbase }}
+          push: true
+          tags: |
+            ${{ steps.tags.outputs.hub }}
+            ${{ steps.tags.outputs.ghcr }}
