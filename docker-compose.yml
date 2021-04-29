@@ -1,0 +1,147 @@
+services:
+  sut:
+    build: .
+    command: /test.sh
+    environment:
+      HBASE_CLUSTER_DISTRIBUTED: "true"
+      HBASE_MANAGES_ZK: "false"
+      HBASE_ROOTDIR: hdfs://namenode:9000/hbase
+      HBASE_ZOOKEEPER_PROPERTY_DATADIR: /var/lib/hbase/zookeeper
+      HBASE_ZOOKEEPER_QUORUM: zoo1,zoo2,zoo3
+    networks:
+      - default
+      - zoo
+    depends_on:
+      - hbase-master
+      - hbase-region1
+      - hbase-region2
+    volumes:
+      - ${PWD}/test/test.sh:/test.sh
+
+  hbase-master:
+    build: .
+    command: hbase-daemon.sh foreground_start master
+    environment:
+      HBASE_CLUSTER_DISTRIBUTED: "true"
+      HBASE_MANAGES_ZK: "false"
+      HBASE_ROOTDIR: hdfs://namenode:9000/hbase
+      HBASE_ZOOKEEPER_PROPERTY_DATADIR: /var/lib/hbase/zookeeper
+      HBASE_ZOOKEEPER_QUORUM: zoo1,zoo2,zoo3
+    networks:
+      - default
+      - zoo
+    depends_on:
+      - namenode
+      - datanode1
+      - datanode2
+      - zoo1
+      - zoo2
+      - zoo3
+
+  hbase-region1:
+    build: .
+    command: hbase-daemon.sh foreground_start regionserver
+    environment:
+      HBASE_CLUSTER_DISTRIBUTED: "true"
+      HBASE_MANAGES_ZK: "false"
+      HBASE_ROOTDIR: hdfs://namenode:9000/hbase
+      HBASE_ZOOKEEPER_PROPERTY_DATADIR: /var/lib/hbase/zookeeper
+      HBASE_ZOOKEEPER_QUORUM: zoo1,zoo2,zoo3
+    networks:
+      - default
+      - zoo
+    depends_on:
+      - namenode
+      - datanode1
+      - datanode2
+      - zoo1
+      - zoo2
+      - zoo3
+
+  hbase-region2:
+    build: .
+    command: hbase-daemon.sh foreground_start regionserver
+    environment:
+      HBASE_CLUSTER_DISTRIBUTED: "true"
+      HBASE_MANAGES_ZK: "false"
+      HBASE_ROOTDIR: hdfs://namenode:9000/hbase
+      HBASE_ZOOKEEPER_PROPERTY_DATADIR: /var/lib/hbase/zookeeper
+      HBASE_ZOOKEEPER_QUORUM: zoo1,zoo2,zoo3
+    networks:
+      - default
+      - zoo
+    depends_on:
+      - namenode
+      - datanode1
+      - datanode2
+      - zoo1
+      - zoo2
+      - zoo3
+
+  namenode:
+    image: ghcr.io/jaconi-io/hadoop:3.3.0-latest
+    command: hdfs namenode
+    environment:
+      FS_DEFAULTFS: hdfs://namenode:9000
+    depends_on:
+      - namenode-format
+    volumes:
+      - namenode:/tmp/hadoop-root/dfs/name
+
+  namenode-format:
+    image: ghcr.io/jaconi-io/hadoop:3.3.0-latest
+    command: hdfs namenode -format -nonInteractive
+    init: true
+    environment:
+      FS_DEFAULTFS: hdfs://namenode:9000
+    volumes:
+      - namenode:/tmp/hadoop-root/dfs/name
+
+  datanode1:
+    image: ghcr.io/jaconi-io/hadoop:3.3.0-latest
+    command: hdfs datanode
+    environment:
+      FS_DEFAULTFS: hdfs://namenode:9000
+    volumes:
+      - datanode1:/tmp/hadoop-root/dfs/name
+
+  datanode2:
+    image: ghcr.io/jaconi-io/hadoop:3.3.0-latest
+    command: hdfs datanode
+    environment:
+      FS_DEFAULTFS: hdfs://namenode:9000
+    volumes:
+      - datanode2:/tmp/hadoop-root/dfs/name
+
+  zoo1:
+    image: zookeeper:latest
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+    networks:
+      - zoo
+
+  zoo2:
+    image: zookeeper:latest
+    environment:
+      ZOO_MY_ID: 2
+      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=0.0.0.0:2888:3888;2181 server.3=zoo3:2888:3888;2181
+    networks:
+      - zoo
+
+  zoo3:
+    image: zookeeper:latest
+    environment:
+      ZOO_MY_ID: 3
+      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=0.0.0.0:2888:3888;2181
+    networks:
+      - zoo
+
+networks:
+  # Create a dedicated network for ZooKeeper.
+  zoo:
+
+volumes:
+  namenode:
+  datanode1:
+  datanode2:

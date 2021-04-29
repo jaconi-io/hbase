@@ -13,3 +13,12 @@ in this container.
 
 If you want to set, for example, `hbase.rootdir` in `hbase-site.xml` you would set the environment variable
 `HBASE_ROOTDIR` instead.
+
+## Testing
+
+To test your changes, run
+
+```
+docker compose build
+docker compose run sut
+```

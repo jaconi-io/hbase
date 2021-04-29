@@ -15,27 +15,25 @@ on:
 
 jobs:
   # Run tests.
-  # See also https://docs.docker.com/docker-hub/builds/automated-testing/
-  # test:
-  #   runs-on: ubuntu-latest
+  test:
+    runs-on: ubuntu-latest
 
-  #   strategy:
-  #     matrix:
-  #       hbase: [1.4.13, 1.6.0, 2.2.7, 2.3.5, 2.4.2]
+    strategy:
+      matrix:
+        hbase: [1.4.13, 1.6.0, 2.2.7, 2.3.5, 2.4.2]
 
-  #   steps:
-  #     - uses: actions/checkout@v2
+    steps:
+      - uses: actions/checkout@v2
 
-  #     - name: Run tests
-  #       run: |
-  #         docker-compose --file docker-compose.test.yml build --build-arg HBASE_VERSION=${{ matrix.hbase }}
-  #         docker-compose --file docker-compose.test.yml run sut
+      - name: Run tests
+        run: |
+          docker-compose build --build-arg HBASE_VERSION=${{ matrix.hbase }}
+          docker-compose run sut
 
   # Push image to Docker Hub and GitHub Container Registry.
-  # See also https://docs.docker.com/docker-hub/builds/
   push:
     # Ensure test job passes before pushing image.
-    # needs: test
+    needs: test
 
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
