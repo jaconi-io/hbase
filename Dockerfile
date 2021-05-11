@@ -32,6 +32,11 @@ ENV PATH /opt/hbase/bin:$PATH
 COPY --from=builder /dockerize /usr/local/bin/dockerize
 COPY --from=builder /hbase /opt/hbase
 COPY --from=builder /hbase-site.xml.tmpl /opt/hbase/conf/hbase-site.xml.tmpl
+COPY --from=builder /core-site.xml.tmpl /opt/hbase/conf/core-site.xml.tmpl
+COPY --from=builder /hdfs-site.xml.tmpl /opt/hbase/conf/hdfs-site.xml.tmpl
 
-ENTRYPOINT [ "dockerize", "-template", "/opt/hbase/conf/hbase-site.xml.tmpl:/opt/hbase/conf/hbase-site.xml" ]
+ENTRYPOINT [ "dockerize", \
+  "-template", "/opt/hbase/conf/hbase-site.xml.tmpl:/opt/hbase/conf/hbase-site.xml", \
+  "-template", "/opt/hbase/conf/core-site.xml.tmpl:/opt/hbase/conf/core-site.xml", \
+  "-template", "/opt/hbase/conf/hdfs-site.xml.tmpl:/opt/hbase/conf/hdfs-site.xml" ]
 CMD [ "hbase", "--help" ]

@@ -44,5 +44,11 @@ generate() {
   echo "</configuration>"
 }
 
+curl "https://hadoop.apache.org/docs/r${HADOOP_VERSION}/hadoop-project-dist/hadoop-common/core-default.xml" --output "core-default.xml"
+generate "core-default.xml" > core-site.xml.tmpl
+
+curl "https://hadoop.apache.org/docs/r${HADOOP_VERSION}/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml" --output "hdfs-default.xml"
+generate "hdfs-default.xml" > hdfs-site.xml.tmpl
+
 curl "https://raw.githubusercontent.com/apache/hbase/rel/${HBASE_VERSION}/hbase-common/src/main/resources/hbase-default.xml" --output "hbase-default.xml"
 generate "hbase-default.xml" > hbase-site.xml.tmpl
