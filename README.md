@@ -2,6 +2,11 @@
 
 A docker image for [Apache HBase](https://hbase.apache.org/).
 
+Included:
+* [Apache Phoenix](https://phoenix.apache.org/)
+* [dockerize](https://github.com/jwilder/dockerize)
+* [Google Cloud Storage connector](https://cloud.google.com/dataproc/docs/concepts/connectors/cloud-storage)
+
 ## Configuration
 
 Apache HBase is usually configured using a XML configuration files:
