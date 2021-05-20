@@ -1,2 +1,6 @@
 *
+!download-dockerize.sh
+!download-gcs-connector.sh
+!download-hbase.sh
+!download-phoenix.sh
 !generate.sh
