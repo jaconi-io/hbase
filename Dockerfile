@@ -49,6 +49,12 @@ RUN apt-get update \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
+# Setup non-root user.
+RUN addgroup --system --gid 10001 hbase \
+ && adduser --system --uid 10001 --ingroup hbase hbase \
+ && chown -R hbase:hbase /opt/hbase
+USER hbase
+
 ENTRYPOINT [ "dockerize", \
   "-template", "/opt/hbase/conf/hbase-site.xml.tmpl:/opt/hbase/conf/hbase-site.xml", \
   "-template", "/opt/hbase/conf/core-site.xml.tmpl:/opt/hbase/conf/core-site.xml", \
